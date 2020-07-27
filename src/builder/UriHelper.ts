@@ -2,6 +2,7 @@ import config from '../lib/Config';
 
 const prefixPresentationUrl = `${config.baseUrl}/iiif/presentation`;
 const prefixImageUrl = `${config.baseUrl}/iiif/image`;
+const prefixSearchUrl = `${config.baseUrl}/iiif/search`;
 const prefixAuthUrl = `${config.baseUrl}/iiif/auth`;
 const prefixFileUrl = `${config.baseUrl}/file`;
 const prefixIconUrl = `${config.baseUrl}/file-icon`;
@@ -23,6 +24,13 @@ export const imageResourceUri =
     (id: string, tier?: string,
      {region = 'full', size = 'max', rotation = '0', quality = 'default', format = 'jpg'}: { [_: string]: string } = {}) =>
         `${imageUri(id, tier)}/${region}/${size}/${rotation}/${quality}.${format}`;
+
+export const searchUri = (id: string, type?: string, language?: string | null) =>
+    `${prefixSearchUrl}/${id}${annoType(type, language)}`;
+export const searchAnnoUri = (id: string, type?: string, language?: string | null, page: number | string = 0) =>
+    `${searchUri(id, type, language)}/anno/${page}`;
+export const autocompleteUri = (id: string, type?: string, language?: string | null) =>
+    `${prefixSearchUrl}/autocomplete/${id}${annoType(type, language)}`;
 
 export const authUri = (type: string) => `${prefixAuthUrl}/${type}`;
 

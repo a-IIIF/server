@@ -7,6 +7,8 @@ import config from '../lib/Config';
 import {TextParams} from '../lib/Service';
 import {indexTexts, deleteTexts, readAlto} from '../lib/Text';
 
+import fixCommonUTF8Problems from './util/unicode_debug_mapping';
+
 const readFileAsync = promisify(fs.readFile);
 
 export default async function processText({collectionId, items}: TextParams) {
@@ -14,7 +16,7 @@ export default async function processText({collectionId, items}: TextParams) {
         const textItems = await Promise.all(items.map(async item => {
             const path = join(config.dataRootPath, config.collectionsRelativePath, item.uri);
 
-            const source = await getTextSource(path);
+            const source = getTextSource(path);
             const text = await getTextFromFile(path, item.encoding);
 
             return {
@@ -30,7 +32,7 @@ export default async function processText({collectionId, items}: TextParams) {
         }));
 
         await deleteTexts(collectionId);
-        await indexTexts(textItems);
+        await indexTexts(textItems.filter(textItem => textItem.text !== ''));
     }
     catch (e) {
         const err = new Error(`Failed to process the texts for ${collectionId}: ${e.message}`);
@@ -39,7 +41,7 @@ export default async function processText({collectionId, items}: TextParams) {
     }
 }
 
-function getTextSource(uri: string): string {
+function getTextSource(uri: string): 'alto' | 'plain' {
     const extension = extname(uri);
     switch (extension) {
         case '.xml':
@@ -54,10 +56,10 @@ export async function getTextFromFile(uri: string, encoding: string | null): Pro
     const extension = extname(uri);
     switch (extension) {
         case '.xml':
-            return await getAltoText(uri);
+            return getAltoText(uri);
         case '.txt':
         default:
-            return await getPlainText(uri, encoding);
+            return getPlainText(uri, encoding);
     }
 }
 
@@ -68,5 +70,7 @@ async function getAltoText(uri: string): Promise<string> {
 
 async function getPlainText(uri: string, encoding: string | null): Promise<string> {
     const textBuffer = await readFileAsync(uri);
-    return decode(textBuffer, encoding || 'utf8');
+    const encodedText = decode(textBuffer, encoding || 'utf8')
+    const fixedText = encoding ? encodedText : fixCommonUTF8Problems(encodedText);
+    return fixedText.normalize();
 }

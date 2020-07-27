@@ -14,6 +14,7 @@ import {AuthTextsByType} from '../service/util/types';
 import {AccessParams, AuthTextsParams} from './Service';
 
 import {AccessTier} from '../builder/elem/v2/Image';
+import {AuthTextsByType} from '../service/util/types';
 
 export type Access =
     { state: AccessState.OPEN | AccessState.CLOSED, tier?: undefined } |

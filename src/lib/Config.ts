@@ -32,6 +32,7 @@ export interface Config {
     videoTilesColumns: number,
     imageTierSeparator: string;
     maxTasksPerWorker: number;
+    maxSearchResults: number;
     services: string[];
     secret: string;
     accessToken: string;
@@ -147,7 +148,13 @@ const config: Config = {
     maxTasksPerWorker: (_ => {
         const maxTasksPerWorker = process.env.IIIF_SERVER_MAX_TASKS_PER_WORKER
             ? parseInt(process.env.IIIF_SERVER_MAX_TASKS_PER_WORKER) : 0;
-        return (maxTasksPerWorker >= 0) ? maxTasksPerWorker : 5;
+        return (maxTasksPerWorker > 0) ? maxTasksPerWorker : 5;
+    })(),
+
+    maxSearchResults: (_ => {
+        const maxSearchResults = process.env.IIIF_SERVER_MAX_SEARCH_RESULTS
+            ? parseInt(process.env.IIIF_SERVER_MAX_SEARCH_RESULTS) : 0;
+        return (maxSearchResults > 0) ? maxSearchResults : 5000;
     })(),
 
     services: (_ => {
@@ -170,7 +177,7 @@ const config: Config = {
 
     port: (_ => {
         const port = process.env.IIIF_SERVER_PORT ? parseInt(process.env.IIIF_SERVER_PORT) : 0;
-        return (port >= 0) ? port : 3333;
+        return (port > 0) ? port : 3333;
     })(),
 
     logLevel: (_ => {

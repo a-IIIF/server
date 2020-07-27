@@ -13,6 +13,7 @@ import getPronomInfo from '../lib/Pronom';
 import derivatives from '../lib/Derivative';
 import {AccessState, hasAccess, hasAdminAccess} from '../lib/Security';
 import {determineItem, getFullPath, getPronom, getAvailableType, hasType, getFullDerivativePath} from '../lib/Item';
+import {getText, getFullPath as getFullTextPath} from '../lib/Text';
 
 const statAsync = promisify(fs.stat);
 
@@ -57,8 +58,23 @@ router.get('/:id/:type(original|access)?', async ctx => {
     logger.info(`Received a request for a file with id ${ctx.params.id}`);
 
     const item = await determineItem(ctx.params.id);
-    if (!item)
-        throw new HttpError(404, `No file found with the id ${ctx.params.id}`);
+    if (!item) {
+        const text = await getText(ctx.params.id);
+        if (!text)
+            throw new HttpError(404, `No file found with the id ${ctx.params.id}`);
+
+        const fullPath = getFullTextPath(text);
+        const name = path.basename(fullPath);
+        const stat = await statAsync(fullPath);
+
+        ctx.set('Content-Type', text.source === 'alto' ? 'application/xml' : 'text/plain');
+        ctx.set('Content-Length', String(stat.size));
+        ctx.set('Content-Disposition', `inline; filename="${name}"`);
+        setBody(ctx, stat, fullPath);
+
+        logger.info(`Sending a text file with id ${ctx.params.id}`);
+        return;
+    }
 
     if (item.type === 'image' && !hasAdminAccess(ctx)) {
         ctx.redirect(`/iiif/image/${item.id}/full/max/0/default.jpg`);
