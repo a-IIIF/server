@@ -21,7 +21,7 @@ import Annotation from './elem/v3/Annotation';
 import TextResource from './elem/v3/TextResource';
 import AnnotationCollection from './elem/v3/AnnotationCollection';
 
-import {annoCollUri, annoPageUri, annoUri, authUri, fileUri, searchUri, autocompleteUri} from './UriHelper';
+import {annoCollUri, annoPageUri, annoUri, authUri, fileUri, searchUri, autocompleteUri, textUri} from './UriHelper';
 
 export async function getManifest(parentItem: RootItem): Promise<Manifest> {
     const manifest = await createManifest(parentItem);
@@ -39,6 +39,8 @@ export async function getManifest(parentItem: RootItem): Promise<Manifest> {
         texts
             .filter(text => text.item_id === item.id)
             .forEach(text => {
+                const label = text.type === 'transcription' ? 'Transcription' : `Translation ${text.language}`;
+
                 const annoPage = new AnnotationPage(annoPageUri(parentItem.id, text.id));
                 canvas.setAnnotations(annoPage);
 
@@ -47,10 +49,10 @@ export async function getManifest(parentItem: RootItem): Promise<Manifest> {
                     type: 'Text',
                     format: text.source === 'alto' ? 'application/xml' : 'plain/text',
                     profile: text.source === 'alto' ? 'http://www.loc.gov/standards/alto/' : undefined,
-                    label: text.source === 'alto'
-                        ? 'ALTO XML'
-                        : (text.type === 'transcription' ? 'Transcription' : `Translation ${text.language}`)
+                    label: text.source === 'alto' ? 'ALTO XML' : label
                 });
+
+                canvas.setMetadata(label, `<a href="${textUri(text.id)}">Open in new window</a>`);
             });
 
         await addThumbnail(canvas, item);

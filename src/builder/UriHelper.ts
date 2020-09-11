@@ -6,6 +6,7 @@ const prefixSearchUrl = `${config.baseUrl}/iiif/search`;
 const prefixAuthUrl = `${config.baseUrl}/iiif/auth`;
 const prefixFileUrl = `${config.baseUrl}/file`;
 const prefixIconUrl = `${config.baseUrl}/file-icon`;
+const prefixTextUrl = `${config.baseUrl}/text`;
 
 const annoType = (type?: string, language?: string | null) => type ? '/' + type + (language ? '_' + language : '') : '';
 
@@ -40,3 +41,5 @@ export const originalUri = (id: string) => `${fileUri(id)}/original`;
 export const derivativeUri = (id: string, type: string) => `${fileUri(id)}/${type}`;
 
 export const iconUri = (icon: string) => `${prefixIconUrl}/${icon}.svg`;
+
+export const textUri = (id: string) => `${prefixTextUrl}/${id}`;

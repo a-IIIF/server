@@ -34,6 +34,7 @@ async function startWeb() {
     const {default: fileRouter} = await import('./file/router');
     const {default: pdfRouter} = await import('./pdf/router');
     const {default: adminRouter} = await import('./admin/router');
+    const {default: textRouter} = await import('./text/router');
     const {default: staticRouter} = await import('./static/router');
 
     const app = new Koa();
@@ -84,6 +85,7 @@ async function startWeb() {
     app.use(fileRouter.routes());
     app.use(pdfRouter.routes());
     app.use(adminRouter.routes());
+    app.use(textRouter.default.routes());
     app.use(staticRouter.routes());
 
     app.proxy = true;

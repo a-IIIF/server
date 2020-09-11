@@ -31,7 +31,12 @@ export async function getAnnotationList(searchResults: SearchResult[], query: st
             const textResource = new TextResource(searchResult.text.text);
 
             const annotation = new Annotation(annotationId, textResource);
-            annotation.setCanvas(canvas);
+            annotation.setCanvas(canvas, {
+                x: 0,
+                y: 0,
+                w: item.width as number,
+                h: item.height as number
+            });
             resources.push(annotation);
 
             const searchHit = new SearchHit();
