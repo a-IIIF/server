@@ -13,15 +13,26 @@ import {
 } from './PresentationUtils';
 
 import Base from './elem/v3/Base';
+import Canvas from './elem/v3/Canvas';
 import Service from './elem/v3/Service';
 import Manifest from './elem/v3/Manifest';
-import AuthService from './elem/v3/AuthService';
-import AnnotationPage from './elem/v3/AnnotationPage';
 import Annotation from './elem/v3/Annotation';
+import AuthService from './elem/v3/AuthService';
 import TextResource from './elem/v3/TextResource';
+import AnnotationPage from './elem/v3/AnnotationPage';
 import AnnotationCollection from './elem/v3/AnnotationCollection';
 
-import {annoCollUri, annoPageUri, annoUri, authUri, fileUri, searchUri, autocompleteUri, textUri} from './UriHelper';
+import {
+    annoCollUri,
+    annoPageUri,
+    annoUri,
+    authUri,
+    fileUri,
+    searchUri,
+    autocompleteUri,
+    textUri,
+    textPlainUri
+} from './UriHelper';
 
 export async function getManifest(parentItem: RootItem): Promise<Manifest> {
     const manifest = await createManifest(parentItem);
@@ -38,22 +49,7 @@ export async function getManifest(parentItem: RootItem): Promise<Manifest> {
 
         texts
             .filter(text => text.item_id === item.id)
-            .forEach(text => {
-                const label = text.type === 'transcription' ? 'Transcription' : `Translation ${text.language}`;
-
-                const annoPage = new AnnotationPage(annoPageUri(parentItem.id, text.id));
-                canvas.setAnnotations(annoPage);
-
-                canvas.setSeeAlso({
-                    id: fileUri(text.id),
-                    type: 'Text',
-                    format: text.source === 'alto' ? 'application/xml' : 'plain/text',
-                    profile: text.source === 'alto' ? 'http://www.loc.gov/standards/alto/' : undefined,
-                    label: text.source === 'alto' ? 'ALTO XML' : label
-                });
-
-                canvas.setMetadata(label, `<a href="${textUri(text.id)}">Open in new window</a>`);
-            });
+            .forEach(text => addText(canvas, parentItem, text));
 
         await addThumbnail(canvas, item);
         await addMetadata(canvas, item);
@@ -74,7 +70,7 @@ export async function getReference(item: RootItem): Promise<Manifest> {
 export async function getAnnotationPage(item: RootItem, text: Text): Promise<AnnotationPage> {
     const annoPage = createAnnotationPage(item, text);
 
-    const items = await getChildItems(item.id, true) as FileItem[];
+    const items = await getChildItems(item) as FileItem[];
     const texts = await getTextsForCollectionId(item.id, text.type, text.language);
 
     const childItem = items.find(item => item.id === text.item_id) as FileItem;
@@ -147,6 +143,37 @@ function addBehavior(base: Base, item: Item, hasMultipleItems = true): void {
         base.setBehavior('paged');
     else
         base.setBehavior('individuals');
+}
+
+function addText(canvas: Canvas, item: Item, text: Text): void {
+    const label = text.type === 'transcription' ? 'Transcription' : `Translation ${text.language}`;
+
+    const annoPage = new AnnotationPage(annoPageUri(item.id, text.id));
+    canvas.setAnnotations(annoPage);
+
+    canvas.setSeeAlso({
+        id: fileUri(text.id),
+        type: 'Text',
+        format: text.source === 'alto' ? 'application/xml' : 'plain/text',
+        profile: text.source === 'alto' ? 'http://www.loc.gov/standards/alto/' : undefined,
+        label: text.source === 'alto' ? 'ALTO XML' : label
+    });
+
+    canvas.setRendering({
+        id: textPlainUri(text.id),
+        label,
+        format: 'plain/text',
+        type: 'Text'
+    });
+
+    canvas.setMetadata(label, `<a href="${textUri(text.id)}">Open in new window</a>`);
+}
+
+async function setAuthenticationServices(item: Item, base: Base): Promise<void> {
+    const authTexts = await getAuthTexts(item);
+    const service = AuthService.getAuthenticationService(authUri, authTexts, 'external');
+    if (service)
+        base.setService(service);
 }
 
 function setSearchService(base: Base, item: Item | Text, type?: string, language?: string | null): void {

@@ -25,7 +25,7 @@ export interface PresentationBuilder {
     getCollection: (item: Item, access: Access) => Promise<Collection | null>;
     getManifest: (item: Item, access: Access) => Promise<Manifest | null>;
     getReference: (item: Item) => Promise<Collection | Manifest | null>;
-    getSearch: (searchResults: SearchResult[], query: string, ignored: string[],
+    getSearch: (searchResults: SearchResult[], query: string, ignored: string[], items: Item[],
                 id: string, type?: string, language?: string) => Promise<AnnotationList>;
     getAutocomplete: (suggestions: string[][], query: string, ignored: string[],
                       id: string, type?: string, language?: string) => TermList;
@@ -83,8 +83,9 @@ export async function getReference(item: Item): Promise<Collection | Manifest | 
 }
 
 export async function getSearch(searchResults: SearchResult[], query: string, ignored: string[],
-                                id: string, type?: string, language?: string | null): Promise<AnnotationList> {
-    return Search.getAnnotationList(searchResults, query, ignored, id, type, language);
+                                items: Item[], id: string,
+                                type?: string, language?: string | null): Promise<AnnotationList> {
+    return Search.getAnnotationList(searchResults, query, ignored, items, id, type, language);
 }
 
 export function getAutocomplete(suggestions: string[][], query: string, ignored: string[],

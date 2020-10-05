@@ -43,3 +43,4 @@ export const derivativeUri = (id: string, type: string) => `${fileUri(id)}/${typ
 export const iconUri = (icon: string) => `${prefixIconUrl}/${icon}.svg`;
 
 export const textUri = (id: string) => `${prefixTextUrl}/${id}`;
+export const textPlainUri = (id: string) => `${textUri(id)}/txt`;

@@ -1,8 +1,9 @@
 import * as Router from '@koa/router';
 
-import {getItem} from '../lib/Item';
 import HttpError from '../lib/HttpError';
-import {getText, getTextsForCollectionId} from '../lib/Text';
+import {Item} from '../lib/ItemInterfaces';
+import {getChildItems, getItem} from '../lib/Item';
+import {Text, getText, getTextsForCollectionId} from '../lib/Text';
 
 import {searchInCollection, searchInText, autoCompleteForCollection, autocompleteForText} from './search';
 import {getSearch, getAutocomplete} from '../builder/PresentationBuilder';
@@ -24,13 +25,15 @@ router.get('/:id', async ctx => {
     if (!item && !text)
         throw new HttpError(404, `No item found for id ${ctx.params.id}`);
 
+    const id = item ? item.collection_id : (text as Text).id;
+    const items = item ? await getChildItems(item) : [await getItem((text as Text).item_id) as Item];
+
     const searchResults = item
-        ? await searchInCollection(ctx.query.q, item.collection_id)
-        : await searchInText(ctx.query.q, text ? text.id : '');
+        ? await searchInCollection(ctx.query.q, id)
+        : await searchInText(ctx.query.q, id);
 
     ctx.set('Content-Type', 'application/json');
-    ctx.body = await getSearch(searchResults, ctx.query.q, ignored(ctx.query),
-        item ? item.collection_id : (text ? text.id : ''));
+    ctx.body = await getSearch(searchResults, ctx.query.q, ignored(ctx.query), items, id);
 });
 
 router.get('/:id/:type(_:language)?', async ctx => {
@@ -39,12 +42,15 @@ router.get('/:id/:type(_:language)?', async ctx => {
         throw new HttpError(404,
             `No text found of type ${ctx.params.type} and language ${ctx.params.language} for item with id ${ctx.params.id}`);
 
+    const collectionItem = await getItem(ctx.params.id);
+    const items = await getChildItems(collectionItem as Item);
+
     const searchResults = await searchInCollection(
         ctx.query.q, texts[0].collection_id, texts[0].type, texts[0].language);
 
     ctx.set('Content-Type', 'application/json');
     ctx.body = await getSearch(searchResults, ctx.query.q, ignored(ctx.query),
-        texts[0].collection_id, texts[0].type, texts[0].language);
+        items, texts[0].collection_id, texts[0].type, texts[0].language);
 });
 
 router.get('/autocomplete/:id', async ctx => {

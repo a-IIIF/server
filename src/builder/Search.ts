@@ -1,5 +1,4 @@
-import {getChildItems} from '../lib/Item';
-import {FileItem} from '../lib/ItemInterfaces';
+import {FileItem, Item} from '../lib/ItemInterfaces';
 import {getFullPath, OcrWord, readAlto, Text} from '../lib/Text';
 
 import Canvas from './elem/v2/Canvas';
@@ -13,11 +12,10 @@ import {SearchResult, SearchResultMatch} from '../search/search';
 import {canvasUri, searchAnnoUri, searchUri, autocompleteUri} from './UriHelper';
 
 export async function getAnnotationList(searchResults: SearchResult[], query: string, ignored: string[],
-                                        id: string, type?: string, language?: string | null): Promise<AnnotationList> {
+                                        items: Item[], id: string,
+                                        type?: string, language?: string | null): Promise<AnnotationList> {
     const uriQuery = `?q=${encodeURIComponent(query)}`;
-
     const annotationList = new AnnotationList(searchUri(id, type, language) + uriQuery);
-    const items = await getChildItems(id, true) as FileItem[];
 
     const resources = [];
     const hits = [];
