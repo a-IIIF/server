@@ -9,8 +9,6 @@ import logger from './Logger';
 import {Item} from './ItemInterfaces';
 import {runTaskWithResponse} from './Task';
 import {getPersistentClient} from './Redis';
-
-import {AuthTextsByType} from '../service/util/types';
 import {AccessParams, AuthTextsParams} from './Service';
 
 import {AccessTier} from '../builder/elem/v2/Image';

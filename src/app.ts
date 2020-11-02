@@ -85,7 +85,7 @@ async function startWeb() {
     app.use(fileRouter.routes());
     app.use(pdfRouter.routes());
     app.use(adminRouter.routes());
-    app.use(textRouter.default.routes());
+    app.use(textRouter.routes());
     app.use(staticRouter.routes());
 
     app.proxy = true;

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as Router from '@koa/router';
+import Router from '@koa/router';
 
 import {getText} from '../lib/Text';
 import logger from '../lib/Logger';

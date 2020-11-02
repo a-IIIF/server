@@ -6,7 +6,7 @@ import * as ImageFunctions from './Image';
 
 import {Text} from '../lib/Text';
 import {Access} from '../lib/Security';
-import {FileItem, FolderItem, ImageItem, Item, MetadataItem, RootItem} from '../lib/ItemInterfaces';
+import {FileItem, FolderItem, Item, MetadataItem, RootItem} from '../lib/ItemInterfaces';
 
 import Image, {ImageProfile} from './elem/v2/Image';
 import AnnotationList from './elem/v2/AnnotationList';

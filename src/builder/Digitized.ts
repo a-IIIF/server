@@ -1,6 +1,6 @@
 import {getChildItems} from '../lib/Item';
+import {getAuthTexts} from '../lib/Security';
 import {Item, RootItem, FileItem} from '../lib/ItemInterfaces';
-import {Access, AccessState, getAuthTexts} from '../lib/Security';
 import {getTextsForCollectionId, getFullPath, readAlto, Text} from '../lib/Text';
 
 import {
