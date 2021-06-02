@@ -334,10 +334,10 @@ function readText(rootId: string, label: string, mets: Document, objects: string
         throw new Error(`No identifier found for object with file id ${fileId}`);
 
     const [objCharacteristics, objCharacteristicsExt] = getObjCharacteristicsAndExt(premisObj, premisNS);
-    if (!objCharacteristics && !objCharacteristicsExt)
-        throw new Error(`No object characteristics and extensions found for object with file id ${fileId}`);
+    if (!objCharacteristics)
+        throw new Error(`No object characteristics found for object with file id ${fileId}`);
 
-    const encoding = determineEncoding(objCharacteristicsExt as Element);
+    const encoding = objCharacteristicsExt ? determineEncoding(objCharacteristicsExt as Element) : null;
 
     const fptrs = structureIISH.find<Element>(`./mets:div[@TYPE="page"]/mets:fptr[@FILEID="${fileId}"]/../mets:fptr`, ns);
     const fptr = fptrs.find(fptrElem => {
